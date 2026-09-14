@@ -1,5 +1,3 @@
-# ensage
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-dark.svg">
   <img src="public/brand/logo-light.svg" alt="ensage" width="320">
@@ -7,6 +5,7 @@
 
 ![ensage landing page](docs/preview.png)
 
+# ensage
 A security-first, self-hosted workspace for sharing text, files, and links. ensage
 uses Next.js 16, React 19, Clerk, PostgreSQL, Drizzle, shadcn/ui, and local
 asynchronous object storage. It has no Vercel runtime dependency.
