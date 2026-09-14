@@ -1,29 +1,11 @@
 import { and, eq, sql } from "drizzle-orm"
 import { customAlphabet } from "nanoid"
-import { z } from "zod"
 import { database } from "@/lib/db"
 import { auditEvents, collections, shares } from "@/lib/db/schema"
 import { authenticateRequest } from "@/lib/server/auth"
 import { apiError } from "@/lib/server/http"
+import { updateCollectionInput } from "@/lib/validation/collection"
 const makeSlug = customAlphabet("23456789abcdefghjkmnpqrstuvwxyz", 14)
-const input = z.object({
-  name: z.string().trim().min(1).max(100).optional(),
-  description: z.string().trim().max(500).nullable().optional(),
-  icon: z
-    .enum([
-      "folder",
-      "code",
-      "briefcase",
-      "book",
-      "palette",
-      "rocket",
-      "heart",
-      "star",
-    ])
-    .optional(),
-  visibility: z.enum(["private", "unlisted", "public"]).optional(),
-  rotateLink: z.boolean().optional(),
-})
 export async function GET(
   request: Request,
   ctx: { params: Promise<{ id: string }> }
@@ -79,7 +61,7 @@ export async function PATCH(
   try {
     const user = await authenticateRequest(request)
     const { id } = await ctx.params
-    const value = input.parse(await request.json())
+    const value = updateCollectionInput.parse(await request.json())
     const [current] = await database()
       .select()
       .from(collections)

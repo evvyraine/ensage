@@ -9,8 +9,13 @@ import {
   RiRocketLine,
   RiStarLine,
 } from "@remixicon/react"
+import type { ComponentType } from "react"
+import { COLLECTION_ICONS, type CollectionIconName } from "@/lib/collections"
 
-const collectionIcons = {
+const collectionIcons: Record<
+  CollectionIconName,
+  ComponentType<{ className?: string }>
+> = {
   folder: RiFolderLine,
   code: RiCodeLine,
   briefcase: RiBriefcaseLine,
@@ -19,11 +24,9 @@ const collectionIcons = {
   rocket: RiRocketLine,
   heart: RiHeartLine,
   star: RiStarLine,
-} as const
+}
 
-export const collectionIconNames = Object.keys(collectionIcons) as Array<
-  keyof typeof collectionIcons
->
+export const collectionIconNames = COLLECTION_ICONS
 
 export function CollectionIcon({
   name,
@@ -32,6 +35,7 @@ export function CollectionIcon({
   name: string
   className?: string
 }) {
-  const Icon = collectionIcons[name as keyof typeof collectionIcons] ?? RiApps2Line
+  const Icon =
+    collectionIcons[name as CollectionIconName] ?? RiApps2Line
   return <Icon className={className} />
 }
