@@ -3,6 +3,7 @@ import { auditEvents, settings, shares } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { authenticateRequest } from "@/lib/server/auth"
 import { apiError } from "@/lib/server/http"
+import { logger } from "@/lib/server/logger"
 import { enforceRateLimit } from "@/lib/server/rate-limit"
 import { digest, randomToken } from "@/lib/server/security"
 import { deleteObject, putStream } from "@/lib/server/storage"
@@ -12,7 +13,7 @@ const makeSlug = customAlphabet("23456789abcdefghjkmnpqrstuvwxyz", 14)
 const headersSchema = z.object({
   name: z.string().min(1).max(255),
   type: z.string().max(160).default("application/octet-stream"),
-  size: z.coerce.number().int().positive().max(104857600),
+  size: z.coerce.number().int().nonnegative().max(5 * 1024 ** 3),
   visibility: z.enum(["private", "unlisted", "public"]).default("unlisted"),
   collectionId: z.uuid().nullable().optional(),
 })
@@ -35,7 +36,8 @@ export async function POST(request: Request) {
       .from(settings)
       .where(eq(settings.userId, user.id))
       .limit(1)
-    if (meta.size > (limits?.maxUploadBytes ?? 104857600))
+    const maxBytes = limits?.maxUploadBytes ?? 104857600
+    if (meta.size > maxBytes)
       return Response.json(
         { error: "File exceeds your workspace upload limit" },
         { status: 413 }
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
       })
       .returning()
     id = pending.id
-    await putStream(key, request.body)
+    await putStream(key, request.body, { maxBytes })
     const [ready] = await database().transaction(async (tx) => {
       const rows = await tx
         .update(shares)
@@ -76,6 +78,11 @@ export async function POST(request: Request) {
         data: { size: meta.size },
       })
       return rows
+    })
+    logger.info("share.uploaded", {
+      shareId: ready.id,
+      ownerId: user.id,
+      sizeBytes: meta.size,
     })
     return Response.json(
       {

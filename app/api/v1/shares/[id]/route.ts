@@ -3,6 +3,7 @@ import { database } from "@/lib/db"
 import { auditEvents, shares } from "@/lib/db/schema"
 import { authenticateRequest } from "@/lib/server/auth"
 import { apiError } from "@/lib/server/http"
+import { hashSecret } from "@/lib/server/security"
 import { customAlphabet } from "nanoid"
 import { z } from "zod"
 
@@ -15,6 +16,7 @@ const updateInput = z.object({
   collectionId: z.uuid().nullable().optional(),
   content: z.string().min(1).max(2_000_000).optional(),
   targetUrl: z.url().optional(),
+  password: z.string().min(8).max(128).nullable().optional(),
   rotateLink: z.boolean().optional(),
 })
 export async function GET(request: Request, ctx: Context) {
@@ -82,6 +84,12 @@ export async function PATCH(request: Request, ctx: Context) {
         )
       const visibilityChanged =
         value.visibility !== undefined && value.visibility !== share.visibility
+      const passwordHash =
+        value.password === undefined
+          ? undefined
+          : value.password === null
+            ? null
+            : await hashSecret(value.password)
       const [updated] = await database()
         .update(shares)
         .set({
@@ -90,6 +98,7 @@ export async function PATCH(request: Request, ctx: Context) {
           collectionId: value.collectionId,
           content: value.content,
           targetUrl: value.targetUrl,
+          passwordHash,
           slug: visibilityChanged || value.rotateLink ? makeSlug() : undefined,
           updatedAt: new Date(),
         })
@@ -106,7 +115,16 @@ export async function PATCH(request: Request, ctx: Context) {
           resourceType: "share",
           resourceId: id,
         })
-      return Response.json({ share: updated })
+      const {
+        passwordHash: _passwordHash,
+        managementTokenHash: _managementTokenHash,
+        storageKey: _storageKey,
+        ...safe
+      } = updated
+      void _passwordHash
+      void _managementTokenHash
+      void _storageKey
+      return Response.json({ share: safe })
     }
     const state =
       body.action === "restore"

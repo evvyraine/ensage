@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { Plus } from "lucide-react"
+import { RiAddLine } from "@remixicon/react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { NewShareForm } from "./new-share-form"
 import { Button } from "@/components/ui/button"
@@ -37,6 +37,23 @@ export function NewShareOverlay({
 }) {
   const mobile = useIsMobile()
   const [open, setOpen] = useState(false)
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "n" && event.key !== "N") return
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      const target = event.target as HTMLElement | null
+      if (
+        target &&
+        (target.isContentEditable ||
+          /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
+      )
+        return
+      event.preventDefault()
+      setOpen(true)
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
   const [data, setData] = useState<Data>({
     collections: [],
     defaults: { visibility: "unlisted", ttl: null, maxUploadBytes: 104857600 },
@@ -63,13 +80,13 @@ export function NewShareOverlay({
       aria-label="New share"
     >
       <span className="grid size-12 -translate-y-3 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg">
-        <Plus className="size-5" />
+        <RiAddLine className="size-5" />
       </span>
       <span className="-mt-3">New</span>
     </button>
   ) : (
     <Button className="w-full justify-start">
-      <Plus />
+      <RiAddLine />
       New share <kbd className="ml-auto text-[10px] opacity-70">N</kbd>
     </Button>
   )

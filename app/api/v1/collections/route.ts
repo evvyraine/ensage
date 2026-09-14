@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm"
 import { z } from "zod"
 import { database } from "@/lib/db"
-import { collections } from "@/lib/db/schema"
+import { auditEvents, collections } from "@/lib/db/schema"
 import { authenticateRequest } from "@/lib/server/auth"
 import { apiError } from "@/lib/server/http"
 import { randomToken } from "@/lib/server/security"
@@ -47,10 +47,19 @@ export async function POST(request: Request) {
   try {
     const user = await authenticateRequest(request)
     const value = input.parse(await request.json())
-    const [created] = await database()
-      .insert(collections)
-      .values({ ...value, ownerId: user.id, slug: toSlug(value.name) })
-      .returning()
+    const [created] = await database().transaction(async (tx) => {
+      const rows = await tx
+        .insert(collections)
+        .values({ ...value, ownerId: user.id, slug: toSlug(value.name) })
+        .returning()
+      await tx.insert(auditEvents).values({
+        actorId: user.id,
+        action: "collection.created",
+        resourceType: "collection",
+        resourceId: rows[0].id,
+      })
+      return rows
+    })
     return Response.json({ collection: created }, { status: 201 })
   } catch (e) {
     return apiError(e)

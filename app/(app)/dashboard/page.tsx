@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowUpRight, Boxes, Eye, FileText } from "lucide-react"
+import { RiArrowRightUpLine, RiApps2Line, RiEyeLine, RiFileTextLine } from "@remixicon/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageHeading } from "@/components/app/page-heading"
@@ -14,30 +14,34 @@ export default async function Dashboard() {
         title="Your workspace"
         description="Everything you’ve shared, at a glance."
       />
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {(
           [
-            [FileText, stats.active, "Active shares"],
-            [Eye, stats.views, "Total views"],
-            [Boxes, stats.collections, "Collections"],
+            [RiFileTextLine, stats.active, "Active shares"],
+            [RiEyeLine, stats.views, "Total views"],
+            [RiApps2Line, stats.collections, "Collections"],
           ] as const
         ).map(([Icon, value, label]) => (
-          <Card key={String(label)}>
-            <CardContent className="p-5">
+          <Card key={String(label)} className="animate-panel-in">
+            <CardContent className="p-3 sm:p-5">
               <Icon className="size-4 text-muted-foreground" />
-              <div className="mt-5 text-2xl font-semibold">{String(value)}</div>
-              <div className="text-xs text-muted-foreground">
+              <div className="mt-3 text-xl font-semibold sm:mt-5 sm:text-2xl">
+                {String(value)}
+              </div>
+              <div className="truncate text-[11px] text-muted-foreground sm:text-xs">
                 {String(label)}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-      <div className="mt-10 mb-4 flex items-center justify-between">
-        <h2 className="font-heading text-xl font-semibold">Recently created</h2>
+      <div className="mt-8 mb-4 flex items-center justify-between sm:mt-10">
+        <h2 className="font-heading text-lg font-semibold sm:text-xl">
+          Recently created
+        </h2>
         <Button variant="ghost" asChild>
           <Link href="/shares">
-            View all <ArrowUpRight />
+            View all <RiArrowRightUpLine />
           </Link>
         </Button>
       </div>

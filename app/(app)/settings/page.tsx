@@ -1,4 +1,5 @@
 import { PageHeading } from "@/components/app/page-heading"
+import { ApiKeys } from "@/components/app/api-keys"
 import { SettingsForm } from "@/components/app/settings-form"
 import { ownerSettings } from "@/lib/server/queries"
 export const dynamic = "force-dynamic"
@@ -10,7 +11,10 @@ export default async function Settings() {
         title="Workspace settings"
         description="Safe defaults for every new share. Stored in PostgreSQL."
       />
-      <SettingsForm settings={settings} />
+      <div className="space-y-6">
+        <SettingsForm settings={settings} />
+        <ApiKeys />
+      </div>
     </>
   )
 }

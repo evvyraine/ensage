@@ -3,6 +3,7 @@ import { database } from "@/lib/db"
 import { auditEvents, shares } from "@/lib/db/schema"
 import { authenticateRequest } from "@/lib/server/auth"
 import { apiError } from "@/lib/server/http"
+import { logger } from "@/lib/server/logger"
 import { enforceRateLimit } from "@/lib/server/rate-limit"
 import { digest, hashSecret, randomToken } from "@/lib/server/security"
 import { createShareInput } from "@/lib/validation/share"
@@ -12,14 +13,22 @@ const slug = customAlphabet("23456789abcdefghjkmnpqrstuvwxyz", 14)
 export async function GET(request: Request) {
   try {
     const user = await authenticateRequest(request)
-    const q = new URL(request.url).searchParams.get("q")
+    const params = new URL(request.url).searchParams
+    const q = params.get("q")
+    const state = params.get("state")
+    const stateFilter =
+      state === "trashed"
+        ? eq(shares.state, "trashed")
+        : state === "ready"
+          ? eq(shares.state, "ready")
+          : ne(shares.state, "deleted")
     const where = q
       ? and(
           eq(shares.ownerId, user.id),
-          ne(shares.state, "deleted"),
+          stateFilter,
           ilike(shares.title, `%${q.slice(0, 100)}%`)
         )
-      : and(eq(shares.ownerId, user.id), ne(shares.state, "deleted"))
+      : and(eq(shares.ownerId, user.id), stateFilter)
     const rows = await database()
       .select({
         id: shares.id,
@@ -82,6 +91,11 @@ export async function POST(request: Request) {
         resourceId: rows[0].id,
       })
       return rows
+    })
+    logger.info("share.created", {
+      shareId: created.id,
+      kind: created.kind,
+      ownerId: user.id,
     })
     return Response.json(
       {

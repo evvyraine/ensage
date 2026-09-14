@@ -1,39 +1,46 @@
 "use client"
+import type { ComponentType } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { UserButton } from "@clerk/nextjs"
 import {
-  Archive,
-  BookOpen,
-  Boxes,
-  Clock3,
-  Home,
-  LayoutDashboard,
-  Search,
-  Settings,
-  Trash2,
-  UserRound,
-} from "lucide-react"
+  RiApps2Line,
+  RiArchiveLine,
+  RiBookOpenLine,
+  RiDashboardLine,
+  RiDeleteBinLine,
+  RiHistoryLine,
+  RiHomeLine,
+  RiSearchLine,
+  RiSettings3Line,
+  RiTimeLine,
+  RiUserLine,
+} from "@remixicon/react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { NewShareOverlay } from "./new-share-overlay"
-const nav = [
-  ["Dashboard", "/dashboard", LayoutDashboard],
-  ["Shares", "/shares", Archive],
-  ["Collections", "/collections", Boxes],
-  ["Recently viewed", "/recent", Clock3],
-  ["Trash", "/trash", Trash2],
-] as const
-const secondary = [
-  ["Settings", "/settings", Settings],
-  ["Account", "/account", UserRound],
-  ["Help & support", "/help", BookOpen],
-] as const
+
+type NavItem = readonly [label: string, href: string, icon: ComponentType<{ className?: string }>]
+
+const nav: NavItem[] = [
+  ["Dashboard", "/dashboard", RiDashboardLine],
+  ["Shares", "/shares", RiArchiveLine],
+  ["Collections", "/collections", RiApps2Line],
+  ["Recently viewed", "/recent", RiTimeLine],
+  ["Activity", "/activity", RiHistoryLine],
+  ["Trash", "/trash", RiDeleteBinLine],
+]
+const secondary: NavItem[] = [
+  ["Settings", "/settings", RiSettings3Line],
+  ["Account", "/account", RiUserLine],
+  ["Help & support", "/help", RiBookOpenLine],
+]
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   return (
-    <div className="min-h-screen pb-28 lg:grid lg:grid-cols-[250px_1fr] lg:pb-0">
-      <aside className="hidden border-r bg-card/70 p-4 backdrop-blur lg:flex lg:flex-col">
+    <div className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[250px_1fr] lg:overflow-hidden">
+      <aside className="hidden border-r bg-card/70 p-4 backdrop-blur lg:flex lg:h-dvh lg:flex-col lg:overflow-y-auto">
         <Link
           href="/dashboard"
           className="px-3 py-2 font-heading text-xl font-semibold"
@@ -45,45 +52,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="mt-5 space-y-1">
           {nav.map(([label, href, Icon]) => (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground",
-                pathname === href && "bg-accent font-medium text-foreground"
-              )}
-            >
-              <Icon className="size-4" />
-              {label}
-            </Link>
+            <NavLink key={href} href={href} label={label} Icon={Icon} active={pathname === href} />
           ))}
         </nav>
-        <div className="mt-auto space-y-1">
+        <div className="mt-auto space-y-1 pt-6">
           {secondary.map(([label, href, Icon]) => (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground",
-                pathname === href && "bg-accent text-foreground"
-              )}
-            >
-              <Icon className="size-4" />
-              {label}
-            </Link>
+            <NavLink key={href} href={href} label={label} Icon={Icon} active={pathname === href} muted />
           ))}
         </div>
       </aside>
-      <div className="min-w-0">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur sm:px-5">
-          <Link
-            href="/dashboard"
-            className="font-heading text-lg font-semibold lg:hidden"
-          >
-            ensage
-          </Link>
-          <form action="/shares" className="relative mx-auto w-full max-w-xl">
-            <Search className="absolute top-2.5 left-3 size-4 text-muted-foreground" />
+
+      <div className="flex min-w-0 flex-col lg:h-dvh lg:overflow-hidden">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur sm:px-5">
+          <form action="/shares" className="relative w-full max-w-xl lg:mx-auto">
+            <RiSearchLine className="absolute top-2.5 left-3 size-4 text-muted-foreground" />
             <Input
               name="q"
               placeholder="Search shares and collections…"
@@ -92,8 +74,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </form>
           <UserButton />
         </header>
-        <div className="mx-auto max-w-7xl p-4 sm:p-8">{children}</div>
+        <div className="app-scroll mx-auto w-full max-w-7xl flex-1 p-4 pb-28 sm:p-8 lg:overflow-y-auto lg:pb-8">
+          <div className="animate-fade-in">{children}</div>
+        </div>
       </div>
+
       <nav
         aria-label="Mobile navigation"
         className="mobile-tab-bar z-40 items-center rounded-2xl border bg-background/95 px-2 py-2 shadow-xl backdrop-blur"
@@ -110,32 +95,62 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <MobileLink
           href="/dashboard"
           label="Home"
-          icon={Home}
+          icon={RiHomeLine}
           active={pathname === "/dashboard"}
         />
         <MobileLink
           href="/shares"
           label="Shares"
-          icon={Archive}
+          icon={RiArchiveLine}
           active={pathname.startsWith("/shares")}
         />
         <NewShareOverlay compact />
         <MobileLink
           href="/collections"
           label="Collections"
-          icon={Boxes}
+          icon={RiApps2Line}
           active={pathname.startsWith("/collections")}
         />
         <MobileLink
           href="/settings"
           label="Settings"
-          icon={Settings}
+          icon={RiSettings3Line}
           active={pathname === "/settings"}
         />
       </nav>
     </div>
   )
 }
+
+function NavLink({
+  href,
+  label,
+  Icon,
+  active,
+  muted = false,
+}: {
+  href: string
+  label: string
+  Icon: ComponentType<{ className?: string }>
+  active: boolean
+  muted?: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "pressable flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground",
+        active && "bg-accent font-medium text-foreground",
+        muted && active && "text-foreground"
+      )}
+    >
+      <Icon className="size-4" />
+      {label}
+    </Link>
+  )
+}
+
 function MobileLink({
   href,
   label,
@@ -144,12 +159,13 @@ function MobileLink({
 }: {
   href: string
   label: string
-  icon: typeof Home
+  icon: ComponentType<{ className?: string }>
   active: boolean
 }) {
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "flex min-w-0 flex-col items-center gap-1 overflow-hidden py-1 text-[10px] font-medium text-muted-foreground",
         active && "text-primary"

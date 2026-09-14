@@ -1,12 +1,19 @@
 import { notFound } from "next/navigation"
+import { cookies } from "next/headers"
 import { and, eq, ne, sql } from "drizzle-orm"
 import { auth } from "@clerk/nextjs/server"
 import Link from "next/link"
-import { ExternalLink, Globe2 } from "lucide-react"
+import { RiExternalLinkLine, RiGlobalLine } from "@remixicon/react"
 import { database } from "@/lib/db"
 import { recentViews, shares, users } from "@/lib/db/schema"
+import { formatDate } from "@/lib/format"
+import { SharePasswordForm } from "@/components/app/share-password-form"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  shareAccessCookieName,
+  verifyShareAccessToken,
+} from "@/lib/server/share-access"
 export const dynamic = "force-dynamic"
 
 export default async function PublicShare({
@@ -50,22 +57,11 @@ export default async function PublicShare({
         })
   }
   if (share.visibility === "private" && !isOwner) notFound()
-  if (share.passwordHash && !isOwner)
-    return (
-      <main className="grid min-h-screen place-items-center p-6">
-        <div className="w-full max-w-sm rounded-2xl border bg-card p-7">
-          <h1 className="font-heading text-2xl font-semibold">
-            Protected share
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to request access to this protected share.
-          </p>
-          <Button className="mt-6 w-full" asChild>
-            <Link href="/sign-in">Sign in to continue</Link>
-          </Button>
-        </div>
-      </main>
-    )
+  if (share.passwordHash && !isOwner) {
+    const token = (await cookies()).get(shareAccessCookieName(share.id))?.value
+    if (!verifyShareAccessToken(share.id, token))
+      return <SharePasswordForm shareId={share.id} />
+  }
   await database()
     .update(shares)
     .set({ viewCount: sql`${shares.viewCount} + 1`, lastViewedAt: new Date() })
@@ -85,7 +81,7 @@ export default async function PublicShare({
           {share.title || "Untitled share"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Shared {share.createdAt.toLocaleDateString()} · {share.viewCount}{" "}
+          Shared {formatDate(share.createdAt)} · {share.viewCount}{" "}
           views
         </p>
       </div>
@@ -101,7 +97,7 @@ export default async function PublicShare({
           className="group block overflow-hidden rounded-2xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="flex min-h-48 items-center justify-center bg-gradient-to-br from-primary/15 via-muted to-background">
-            <Globe2 className="size-14 text-primary/70" />
+            <RiGlobalLine className="size-14 text-primary/70" />
           </div>
           <div className="flex items-center gap-4 p-6">
             <div className="min-w-0 flex-1">
@@ -115,7 +111,7 @@ export default async function PublicShare({
                 {share.targetUrl}
               </p>
             </div>
-            <ExternalLink className="size-5 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <RiExternalLinkLine className="size-5 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
         </a>
       ) : (

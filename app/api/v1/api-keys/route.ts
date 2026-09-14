@@ -1,9 +1,33 @@
+import { desc, eq } from "drizzle-orm"
 import { database } from "@/lib/db"
 import { apiKeys, auditEvents } from "@/lib/db/schema"
 import { requireUser } from "@/lib/server/auth"
 import { apiError } from "@/lib/server/http"
 import { hashSecret, randomToken } from "@/lib/server/security"
 import { z } from "zod"
+
+export async function GET() {
+  try {
+    const user = await requireUser()
+    const rows = await database()
+      .select({
+        id: apiKeys.id,
+        name: apiKeys.name,
+        prefix: apiKeys.prefix,
+        lastUsedAt: apiKeys.lastUsedAt,
+        expiresAt: apiKeys.expiresAt,
+        revokedAt: apiKeys.revokedAt,
+        createdAt: apiKeys.createdAt,
+      })
+      .from(apiKeys)
+      .where(eq(apiKeys.ownerId, user.id))
+      .orderBy(desc(apiKeys.createdAt))
+    return Response.json({ keys: rows })
+  } catch (e) {
+    return apiError(e)
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const user = await requireUser()

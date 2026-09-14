@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Code2, FileUp, Link2, LockKeyhole } from "lucide-react"
+import { RiCodeLine, RiUploadCloud2Line, RiLink, RiLockLine } from "@remixicon/react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { VisibilityPills } from "./visibility-pills"
 type Collection = { id: string; name: string }
 export function NewShareForm({
   defaults,
@@ -111,15 +112,15 @@ export function NewShareForm({
       <Tabs value={kind} onValueChange={setKind}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="text">
-            <Code2 />
+            <RiCodeLine />
             Text
           </TabsTrigger>
           <TabsTrigger value="file">
-            <FileUp />
+            <RiUploadCloud2Line />
             File
           </TabsTrigger>
           <TabsTrigger value="link">
-            <Link2 />
+            <RiLink />
             Link
           </TabsTrigger>
         </TabsList>
@@ -133,7 +134,7 @@ export function NewShareForm({
         </TabsContent>
         <TabsContent value="file">
           <label className="mt-3 flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-muted/20 p-4 text-center">
-            <FileUp className="mb-3 size-7 text-primary" />
+            <RiUploadCloud2Line className="mb-3 size-7 text-primary" />
             <span className="font-medium">Choose a file</span>
             <span className="text-xs text-muted-foreground">
               Up to {Math.floor(defaults.maxUploadBytes / 1048576)} MB
@@ -162,6 +163,10 @@ export function NewShareForm({
           <Select
             name="collectionId"
             defaultValue={initialCollectionId ?? "none"}
+            items={[
+              { value: "none", label: "No collection" },
+              ...collections.map((c) => ({ value: c.id, label: c.name })),
+            ]}
           >
             <SelectTrigger className="mt-2">
               <SelectValue />
@@ -176,24 +181,21 @@ export function NewShareForm({
             </SelectContent>
           </Select>
         </div>
-        <div>
+        <div className="space-y-2">
           <Label>Visibility</Label>
-          <Select name="visibility" defaultValue={defaults.visibility}>
-            <SelectTrigger className="mt-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="private">Private</SelectItem>
-              <SelectItem value="unlisted">Anyone with link</SelectItem>
-              <SelectItem value="public">Public</SelectItem>
-            </SelectContent>
-          </Select>
+          <VisibilityPills defaultValue={defaults.visibility} />
         </div>
         <div>
           <Label>Expires</Label>
           <Select
             name="ttl"
             defaultValue={defaults.ttl ? String(defaults.ttl) : "never"}
+            items={[
+              { value: "1", label: "1 hour" },
+              { value: "24", label: "24 hours" },
+              { value: "168", label: "7 days" },
+              { value: "never", label: "Never" },
+            ]}
           >
             <SelectTrigger className="mt-2">
               <SelectValue />
@@ -207,9 +209,12 @@ export function NewShareForm({
           </Select>
         </div>
         <div>
-          <Label>Password</Label>
+          <Label>
+            Password{" "}
+            <span className="text-muted-foreground">min 8 characters</span>
+          </Label>
           <div className="relative mt-2">
-            <LockKeyhole className="absolute top-2.5 left-3 size-4 text-muted-foreground" />
+            <RiLockLine className="absolute top-2.5 left-3 size-4 text-muted-foreground" />
             <Input
               name="password"
               type="password"

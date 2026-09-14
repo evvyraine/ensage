@@ -14,6 +14,10 @@ async function sweep() {
         if (target.startsWith(`${storageRoot}/`)) await rm(target, { force: true }).catch(() => {})
       }
       await client.query("delete from shares where id = $1", [row.id])
+      await client.query(
+        "insert into audit_events (actor_id, action, resource_type, resource_id) values (null, 'share.purged', 'share', $1)",
+        [String(row.id)]
+      )
     }
     if (rows.length) console.log(`[cleanup] permanently removed ${rows.length} shares`)
     await client.query("delete from rate_limits where bucket < now() - interval '1 day'")

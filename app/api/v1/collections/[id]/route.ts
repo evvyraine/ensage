@@ -1,8 +1,8 @@
-import { and, eq } from "drizzle-orm"
+import { and, eq, sql } from "drizzle-orm"
 import { customAlphabet } from "nanoid"
 import { z } from "zod"
 import { database } from "@/lib/db"
-import { collections, shares } from "@/lib/db/schema"
+import { auditEvents, collections, shares } from "@/lib/db/schema"
 import { authenticateRequest } from "@/lib/server/auth"
 import { apiError } from "@/lib/server/http"
 const makeSlug = customAlphabet("23456789abcdefghjkmnpqrstuvwxyz", 14)
@@ -39,7 +39,26 @@ export async function GET(
     if (!collection)
       return Response.json({ error: "Not found" }, { status: 404 })
     const items = await database()
-      .select()
+      .select({
+        id: shares.id,
+        slug: shares.slug,
+        kind: shares.kind,
+        state: shares.state,
+        visibility: shares.visibility,
+        title: shares.title,
+        content: shares.content,
+        targetUrl: shares.targetUrl,
+        originalName: shares.originalName,
+        mediaType: shares.mediaType,
+        sizeBytes: shares.sizeBytes,
+        collectionId: shares.collectionId,
+        hasPassword: sql<boolean>`(${shares.passwordHash} is not null)`,
+        expiresAt: shares.expiresAt,
+        lastViewedAt: shares.lastViewedAt,
+        viewCount: shares.viewCount,
+        createdAt: shares.createdAt,
+        updatedAt: shares.updatedAt,
+      })
       .from(shares)
       .where(
         and(
@@ -78,6 +97,12 @@ export async function PATCH(
       })
       .where(eq(collections.id, id))
       .returning()
+    await database().insert(auditEvents).values({
+      actorId: user.id,
+      action: "collection.updated",
+      resourceType: "collection",
+      resourceId: id,
+    })
     return Response.json({ collection: updated })
   } catch (e) {
     return apiError(e)
@@ -98,9 +123,14 @@ export async function DELETE(
       .delete(collections)
       .where(and(eq(collections.id, id), eq(collections.ownerId, user.id)))
       .returning({ id: collections.id })
-    return deleted
-      ? new Response(null, { status: 204 })
-      : Response.json({ error: "Not found" }, { status: 404 })
+    if (!deleted) return Response.json({ error: "Not found" }, { status: 404 })
+    await database().insert(auditEvents).values({
+      actorId: user.id,
+      action: "collection.deleted",
+      resourceType: "collection",
+      resourceId: id,
+    })
+    return new Response(null, { status: 204 })
   } catch (e) {
     return apiError(e)
   }

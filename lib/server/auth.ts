@@ -1,36 +1,52 @@
 import "server-only"
 import { auth } from "@clerk/nextjs/server"
 import { and, eq, isNull } from "drizzle-orm"
+import { redirect } from "next/navigation"
 import { database } from "@/lib/db"
 import { apiKeys, settings, users } from "@/lib/db/schema"
 import { verifySecret } from "./security"
 
-export async function requireUser() {
-  const session = await auth()
-  if (!session.userId) throw new Error("UNAUTHORIZED")
+async function provisionUser(clerkId: string) {
   const db = database()
   const [user] = await db
     .select()
     .from(users)
-    .where(eq(users.clerkId, session.userId))
+    .where(eq(users.clerkId, clerkId))
     .limit(1)
   if (user) return user
   const [created] = await db
     .insert(users)
-    .values({ clerkId: session.userId })
+    .values({ clerkId })
     .onConflictDoNothing()
     .returning()
   if (!created) {
     const [existing] = await db
       .select()
       .from(users)
-      .where(eq(users.clerkId, session.userId))
+      .where(eq(users.clerkId, clerkId))
       .limit(1)
     if (existing) return existing
     throw new Error("Could not provision local user")
   }
   await db.insert(settings).values({ userId: created.id }).onConflictDoNothing()
   return created
+}
+
+// For API route handlers: callers translate the thrown error into a 401 JSON
+// response via `apiError`.
+export async function requireUser() {
+  const session = await auth()
+  if (!session.userId) throw new Error("UNAUTHORIZED")
+  return provisionUser(session.userId)
+}
+
+// For Server Components: signed-out visitors are redirected to sign-in instead
+// of hitting an error page. Authorization lives at the data-access boundary,
+// not only in the proxy matcher.
+export async function requirePageUser() {
+  const session = await auth()
+  if (!session.userId) redirect("/sign-in")
+  return provisionUser(session.userId)
 }
 
 export async function authenticateRequest(request: Request) {

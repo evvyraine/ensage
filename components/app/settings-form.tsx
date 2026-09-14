@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { VisibilityPills } from "./visibility-pills"
 type Settings = {
   defaultVisibility: "private" | "unlisted" | "public"
   defaultTtlHours: number | null
@@ -42,18 +43,9 @@ export function SettingsForm({ settings }: { settings: Settings }) {
           <CardTitle>Sharing defaults</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-5 sm:grid-cols-2">
-          <div>
+          <div className="space-y-2">
             <Label>Default visibility</Label>
-            <Select name="visibility" defaultValue={settings.defaultVisibility}>
-              <SelectTrigger className="mt-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="private">Private</SelectItem>
-                <SelectItem value="unlisted">Anyone with link</SelectItem>
-                <SelectItem value="public">Public</SelectItem>
-              </SelectContent>
-            </Select>
+            <VisibilityPills defaultValue={settings.defaultVisibility} />
           </div>
           <div>
             <Label>Default expiration</Label>
@@ -64,6 +56,11 @@ export function SettingsForm({ settings }: { settings: Settings }) {
                   ? String(settings.defaultTtlHours)
                   : "never"
               }
+              items={[
+                { value: "24", label: "24 hours" },
+                { value: "168", label: "7 days" },
+                { value: "never", label: "Never" },
+              ]}
             >
               <SelectTrigger className="mt-2">
                 <SelectValue />

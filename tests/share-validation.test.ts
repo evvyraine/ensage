@@ -23,4 +23,26 @@ describe("share request validation", () => {
       })
     ).toThrow()
   })
+  it("requires viewer passwords to be at least 8 characters", () => {
+    expect(() =>
+      createShareInput.parse({
+        share: { kind: "text", content: "x" },
+        password: "short",
+      })
+    ).toThrow()
+    expect(
+      createShareInput.parse({
+        share: { kind: "text", content: "x" },
+        password: "longenough",
+      }).password
+    ).toBe("longenough")
+  })
+  it("rejects a non-uuid collection id", () => {
+    expect(() =>
+      createShareInput.parse({
+        share: { kind: "text", content: "x" },
+        collectionId: "not-a-uuid",
+      })
+    ).toThrow()
+  })
 })

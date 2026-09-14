@@ -1,12 +1,5 @@
 import Link from "next/link"
-import {
-  ArrowRight,
-  Check,
-  Command,
-  LockKeyhole,
-  Server,
-  Sparkles,
-} from "lucide-react"
+import { RiArrowRightLine, RiCheckLine, RiCommandLine, RiLockLine, RiServerLine, RiSparklingLine } from "@remixicon/react"
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 
@@ -37,7 +30,7 @@ export default function Home() {
       <section className="mx-auto grid max-w-6xl gap-16 px-6 py-24 lg:grid-cols-[1.05fr_.95fr] lg:py-32">
         <div>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
-            <Sparkles className="size-3 text-primary" />
+            <RiSparklingLine className="size-3 text-primary" />
             Built for fast, private sharing
           </div>
           <h1 className="font-heading text-5xl leading-[1.03] font-semibold tracking-tight sm:text-7xl">
@@ -53,7 +46,7 @@ export default function Home() {
           <div className="mt-9 flex gap-3">
             <SignUpButton mode="modal">
               <Button size="lg">
-                Create your workspace <ArrowRight />
+                Create your workspace <RiArrowRightLine />
               </Button>
             </SignUpButton>
             <Button size="lg" variant="outline" asChild>
@@ -67,7 +60,7 @@ export default function Home() {
               "Owner-managed access",
             ].map((x) => (
               <span key={x} className="flex items-center gap-2">
-                <Check className="size-4 text-primary" />
+                <RiCheckLine className="size-4 text-primary" />
                 {x}
               </span>
             ))}
@@ -90,9 +83,9 @@ export default function Home() {
             </pre>
             <div className="grid grid-cols-3 gap-3">
               {[
-                [LockKeyhole, "Private by design"],
-                [Command, "CLI native"],
-                [Server, "Yours to run"],
+                [RiLockLine, "Private by design"],
+                [RiCommandLine, "CLI native"],
+                [RiServerLine, "Yours to run"],
               ].map(([Icon, label]) => (
                 <div
                   key={String(label)}

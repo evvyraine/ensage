@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { and, eq, ne } from "drizzle-orm"
 import { auth } from "@clerk/nextjs/server"
-import { ExternalLink, FileText, Link2, Paperclip } from "lucide-react"
+import { RiExternalLinkLine, RiFileTextLine, RiLink, RiAttachment2 } from "@remixicon/react"
 import { database } from "@/lib/db"
 import { collections, shares, users } from "@/lib/db/schema"
 import { Badge } from "@/components/ui/badge"
@@ -58,10 +58,10 @@ export default async function SharedCollection({
         {items.map((item) => {
           const Icon =
             item.kind === "text"
-              ? FileText
+              ? RiFileTextLine
               : item.kind === "file"
-                ? Paperclip
-                : Link2
+                ? RiAttachment2
+                : RiLink
           return (
             <Link
               key={item.id}
@@ -84,7 +84,7 @@ export default async function SharedCollection({
                         : item.mediaType}
                   </p>
                 </div>
-                <ExternalLink className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                <RiExternalLinkLine className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
               </div>
             </Link>
           )
