@@ -1,9 +1,10 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { cookies } from "next/headers"
 import { and, eq, ne, sql } from "drizzle-orm"
 import { auth } from "@clerk/nextjs/server"
-import Link from "next/link"
 import { RiExternalLinkLine, RiGlobalLine } from "@remixicon/react"
+import { Logo } from "@/components/brand"
 import { database } from "@/lib/db"
 import { recentViews, shares, users } from "@/lib/db/schema"
 import { formatDate } from "@/lib/format"
@@ -15,6 +16,12 @@ import {
   verifyShareAccessToken,
 } from "@/lib/server/share-access"
 export const dynamic = "force-dynamic"
+
+// Shared links are private by nature — never index them.
+export const metadata: Metadata = {
+  title: "Shared item",
+  robots: { index: false, follow: false },
+}
 
 export default async function PublicShare({
   params,
@@ -69,9 +76,7 @@ export default async function PublicShare({
   return (
     <main className="mx-auto max-w-5xl p-6 py-12">
       <header className="mb-8 flex items-center">
-        <Link href="/" className="font-heading text-xl font-semibold">
-          ensage
-        </Link>
+        <Logo href="/" />
         <Badge className="ml-auto" variant="secondary">
           {share.kind}
         </Badge>

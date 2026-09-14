@@ -1,12 +1,21 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { and, eq, ne } from "drizzle-orm"
 import { auth } from "@clerk/nextjs/server"
 import { RiExternalLinkLine, RiFileTextLine, RiLink, RiAttachment2 } from "@remixicon/react"
+import { Logo } from "@/components/brand"
 import { database } from "@/lib/db"
 import { collections, shares, users } from "@/lib/db/schema"
 import { Badge } from "@/components/ui/badge"
 export const dynamic = "force-dynamic"
+
+// Shared collections are private by nature — never index them.
+export const metadata: Metadata = {
+  title: "Shared collection",
+  robots: { index: false, follow: false },
+}
+
 export default async function SharedCollection({
   params,
 }: {
@@ -43,9 +52,7 @@ export default async function SharedCollection({
   return (
     <main className="mx-auto min-h-screen max-w-5xl p-5 py-10 sm:p-8">
       <header className="mb-12 flex items-center">
-        <Link href="/" className="font-heading text-xl font-semibold">
-          en<span className="text-primary">sage</span>
-        </Link>
+        <Logo href="/" />
         <Badge className="ml-auto" variant="secondary">
           Shared collection
         </Badge>

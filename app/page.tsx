@@ -1,15 +1,14 @@
 import Link from "next/link"
 import { RiArrowRightLine, RiCheckLine, RiCommandLine, RiLockLine, RiServerLine, RiSparklingLine } from "@remixicon/react"
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
+import { Logo } from "@/components/brand"
 import { Button } from "@/components/ui/button"
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       <nav className="mx-auto flex h-16 max-w-6xl items-center px-6">
-        <Link href="/" className="font-heading text-xl font-semibold">
-          en<span className="text-primary">sage</span>
-        </Link>
+        <Logo href="/" />
         <div className="ml-auto flex items-center gap-2">
           <Show when="signed-out">
             <SignInButton mode="modal">

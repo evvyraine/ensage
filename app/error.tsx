@@ -1,6 +1,7 @@
 "use client"
 import { useEffect } from "react"
 import Link from "next/link"
+import { Logo } from "@/components/brand"
 import { Button } from "@/components/ui/button"
 export default function Error({
   error,
@@ -15,6 +16,7 @@ export default function Error({
   return (
     <main className="grid min-h-screen place-items-center p-6">
       <div className="max-w-md text-center">
+        <Logo href="/" className="mb-7" />
         <h1 className="font-heading text-2xl font-semibold">
           Something went wrong
         </h1>

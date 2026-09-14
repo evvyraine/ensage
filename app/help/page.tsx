@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { RiBookOpenLine, RiCommandLine, RiLifebuoyLine, RiShieldCheckLine } from "@remixicon/react"
 import { Show, SignUpButton } from "@clerk/nextjs"
+import { Logo } from "@/components/brand"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 const cards = [
@@ -29,9 +30,7 @@ export default function Help() {
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-6 py-12">
       <header className="mb-10 flex items-center">
-        <Link href="/" className="font-heading text-xl font-semibold">
-          en<span className="text-primary">sage</span>
-        </Link>
+        <Logo href="/" />
         <Show when="signed-in">
           <Button className="ml-auto" asChild>
             <Link href="/dashboard">Open workspace</Link>

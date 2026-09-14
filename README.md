@@ -1,5 +1,10 @@
 # ensage
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-dark.svg">
+  <img src="public/brand/logo-light.svg" alt="ensage" width="320">
+</picture>
+
 ![ensage landing page](docs/preview.png)
 
 A security-first, self-hosted workspace for sharing text, files, and links. ensage
@@ -13,6 +18,8 @@ asynchronous object storage. It has no Vercel runtime dependency.
 - Collections that group related shares and can be published as a set.
 - Search across shares and collections, plus a per-workspace activity log.
 - REST API and a companion CLI (`ensage`) for terminal workflows.
+- Installable PWA with an offline fallback, plus Open Graph metadata, a sitemap,
+  and `robots.txt` for search engines.
 
 ## Architecture
 
@@ -45,6 +52,7 @@ npm run dev                  # http://localhost:3000
 | `NEXT_PUBLIC_CLERK_SIGN_UP_URL`     | no       | Defaults to `/sign-up`.                                     |
 | `PORT`                              | no       | Port for `next start` / the standalone server. Default 3000. |
 | `WEB_CONCURRENCY`                   | no       | Number of PM2 cluster workers. Default 1.                   |
+| `NEXT_PUBLIC_APP_URL`               | no       | Public origin for canonical/OG URLs and the manifest. Defaults to `https://ensage.shftln.com`. |
 | `LOG_LEVEL`                         | no       | `debug`/`info`/`warn`/`error`. Default `info`. Logs are JSON lines. |
 
 Only infrastructure secrets and paths belong in the environment. Product
@@ -99,5 +107,5 @@ npm install -g pm2
 npm run start:pm2
 ```
 
-The PM2 setup runs the Next.js server in cluster mode plus a `cleanup` worker
-that permanently removes expired, trashed, and deleted shares.
+The PM2 setup runs the Next.js server plus a `cleanup` worker that permanently
+removes expired, trashed, and deleted shares.

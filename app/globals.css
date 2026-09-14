@@ -165,6 +165,18 @@
   overscroll-behavior: contain;
 }
 
+/* Installed PWAs (iOS "Add to Home Screen"): keep the header clear of the
+   status bar / notch whenever the browser overlays it. A no-op when the safe
+   area is zero, which it is with the default status bar style. */
+@media (display-mode: standalone) {
+  .app-shell {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .app-header {
+    top: env(safe-area-inset-top, 0px);
+  }
+}
+
 @keyframes ensage-panel-in {
   from {
     opacity: 0;

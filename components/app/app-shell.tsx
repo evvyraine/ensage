@@ -17,6 +17,7 @@ import {
   RiUserLine,
 } from "@remixicon/react"
 import { cn } from "@/lib/utils"
+import { Logo } from "@/components/brand"
 import { Input } from "@/components/ui/input"
 import { NewShareOverlay } from "./new-share-overlay"
 
@@ -39,14 +40,9 @@ const secondary: NavItem[] = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   return (
-    <div className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[250px_1fr] lg:overflow-hidden">
+    <div className="app-shell min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[250px_1fr] lg:overflow-hidden">
       <aside className="hidden border-r bg-card/70 p-4 backdrop-blur lg:flex lg:h-dvh lg:flex-col lg:overflow-y-auto">
-        <Link
-          href="/dashboard"
-          className="px-3 py-2 font-heading text-xl font-semibold"
-        >
-          en<span className="text-primary">sage</span>
-        </Link>
+        <Logo href="/dashboard" className="px-3 py-2" />
         <div className="mt-5">
           <NewShareOverlay />
         </div>
@@ -63,7 +59,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-col lg:h-dvh lg:overflow-hidden">
-        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur sm:px-5">
+        <header className="app-header sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur sm:px-5">
           <form action="/shares" className="relative w-full max-w-xl lg:mx-auto">
             <RiSearchLine className="absolute top-2.5 left-3 size-4 text-muted-foreground" />
             <Input
